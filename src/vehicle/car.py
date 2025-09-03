@@ -11,7 +11,7 @@ from .constants import SCALE
 
 class Vec2:
     def __init__(self, x: float, y: float) -> None:
-        self.content = np.array([x, y])
+        self.content = np.array([x, y], dtype=np.float32)
 
     @property
     def x(self) -> float:
@@ -24,8 +24,14 @@ class Vec2:
     def rotate(self, matrix: np.ndarray) -> None:
         self.content = np.dot(matrix, self.content)
 
-    def add(self, vec: Vec2) -> None:
-        self.content += vec.content
+    def rotated(self, matrix: np.ndarray) -> np.ndarray:
+        return np.dot(matrix, self.content)
+
+    def add(self, vec: np.ndarray) -> None:
+        self.content += vec
+
+    def added(self, vec: np.ndarray) -> np.ndarray:
+        return self.content + vec
 
 
 class Wheel:
@@ -34,20 +40,10 @@ class Wheel:
 
     def __init__(self, parent: Car, x: float, y: float) -> None:
         self._parent: Car = parent
-        self.pos_x: float = x
-        self.pos_y: float = y
+        self._car_relative_pos: Vec2 = Vec2(x, y)
 
-        self.x: float = 0
-        self.y: float = 0
+        self._pos: Vec2 = Vec2(0, 0)
         self._tilt: float = 0.0
-
-    @property
-    def width(self) -> int:
-        return self.WIDTH
-
-    @property
-    def height(self) -> int:
-        return self.HEIGHT
 
     @property
     def rotation_degree(self) -> float:
@@ -62,12 +58,11 @@ class Wheel:
         self._tilt = value
 
     @property
-    def pos(self) -> tuple[int, int]:
-        return int(self.x), int(self.y)
+    def pos(self) -> Vec2:
+        return self._pos
 
     def move(self, x: float, y: float) -> None:
-        self.x = x
-        self.y = y
+        self._pos = Vec2(x, y)
 
 
 @dataclass
@@ -89,7 +84,7 @@ class WheelPos(Enum):
 class Car:
     WIDTH: int = 12 * SCALE
     HEIGHT: int = 25 * SCALE
-    OFFSET_Y: int = 6 * SCALE
+    OFFSET_Y: int = HEIGHT // 5
 
     MAX_SPEED_FORWARD: float = 4 * SCALE
     MAX_SPEED_BACKWARD: float = 2 * SCALE
@@ -105,8 +100,7 @@ class Car:
     def __init__(
         self, start_x: float, start_y: float, starting_rotation_degree: float = 0
     ) -> None:
-        self._x: float = start_x
-        self._y: float = start_y
+        self._pos: Vec2 = Vec2(start_x, start_y)
 
         self._rotation_degree: float = starting_rotation_degree
         self._velocity: float = 0.0
@@ -145,9 +139,11 @@ class Car:
 
     @property
     def rect(self) -> tuple[int, int, int, int]:
+        x = int(self._pos.x + self.WIDTH / 2)
+        y = int(self._pos.y + self.HEIGHT / 2)
         return (
-            int(self._x + self.WIDTH / 2),
-            int(self._y + self.HEIGHT / 2),
+            x,
+            y,
             self.WIDTH,
             self.HEIGHT,
         )
@@ -162,33 +158,30 @@ class Car:
         self._velocity = min(self.MAX_SPEED_FORWARD, v)
 
     def move(self) -> None:
-        cor = self._cor_pos_relative()
-        if cor == None:
-            self._move_forward()
+        self._move_forward()
+        if self._cor_pos_relative() == None:
             return
         delta_rad = math.radians(self._steering_angle())
-        phi_rad = math.radians(self._rotation_degree)
-        self._x += self._velocity * math.sin(phi_rad)
-        self._y -= self._velocity * math.cos(phi_rad)
         self._rotation_degree += math.degrees(
             self._velocity / self.DISTANCE_FRONT_BACK_WHEELS * math.tan(delta_rad)
         )
 
     def _move_forward(self):
-        dx = math.sin(math.radians(self._rotation_degree)) * self._velocity
-        dy = math.cos(math.radians(self._rotation_degree)) * self._velocity
-        self._x += dx
-        self._y += -dy
+        self._pos.add(self._delta_pos())
+
+    def _delta_pos(self) -> np.ndarray:
+        angle_rad = math.radians(self._rotation_degree)
+        unit_direction = np.array([math.sin(angle_rad), -math.cos(angle_rad)])
+        return unit_direction * self._velocity
 
     def update(self) -> None:
-        rot_radians = math.radians(self.rotation_degree)
-        sin_angle = math.sin(rot_radians)
-        cos_angle = math.cos(rot_radians)
         self.move()
         for pos, wheel in self._wheels.items():
-            x: int = int(self._x + wheel.pos_x * cos_angle - wheel.pos_y * sin_angle)
-            y: int = int(self._y + wheel.pos_x * sin_angle + wheel.pos_y * cos_angle)
-            self._wheels[pos].move(x, y)
+            new_pos = (
+                np.dot(self._rotation_matrix(), wheel._car_relative_pos.content)
+                + self._pos.content
+            )
+            self._wheels[pos].move(new_pos[0], new_pos[1])
         self._update_wheels_tilt()
 
     def slow_down(self) -> None:
@@ -200,10 +193,14 @@ class Car:
     def wheels_pos(self) -> list[WheelInfo]:
         value: list[WheelInfo] = []
         for _, wheel in self._wheels.items():
-            x: int = int(wheel.x)
-            y: int = int(wheel.y)
             value.append(
-                WheelInfo(x, y, wheel.WIDTH, wheel.HEIGHT, wheel.rotation_degree)
+                WheelInfo(
+                    int(wheel.pos.x),
+                    int(wheel.pos.y),
+                    wheel.WIDTH,
+                    wheel.HEIGHT,
+                    wheel.rotation_degree,
+                )
             )
         return value
 
@@ -220,23 +217,21 @@ class Car:
         elif self._rotation_degree >= 360:
             self._rotation_degree -= 360
 
-    def cor_pos(self) -> tuple[float, float] | None:
+    def cor_pos(self) -> Vec2 | None:
         pos = self._cor_pos_relative()
         if pos == None:
             return None
-        x, y = pos
-        return x + self._x, y + self._y
+        pos.content += self._pos.content
+        return pos
 
-    def _cor_pos_relative(self) -> tuple[float, float] | None:
+    def _cor_pos_relative(self) -> Vec2 | None:
         if abs(self._cor_y) < self.MIN_STEER_TILT:
             return None
         local_x = -self.COR_DIST_X if self._cor_y < 0 else self.COR_DIST_X
         local_y = abs(self._cor_y) - self.HEIGHT / 2 + self.OFFSET_Y
-        sin_angle = math.sin(math.radians(self._rotation_degree))
-        cos_angle = math.cos(math.radians(self._rotation_degree))
-        x = local_x * cos_angle - local_y * sin_angle
-        y = local_x * sin_angle + local_y * cos_angle
-        return x, y
+        local = Vec2(local_x, local_y)
+        local.rotate(self._rotation_matrix())
+        return local
 
     def _steering_angle(self) -> float:
         lhs = self._wheels[WheelPos.LEFT_FRONT].tilt
@@ -248,9 +243,7 @@ class Car:
         self._update_wheel_tilt(cor, WheelPos.LEFT_FRONT)
         self._update_wheel_tilt(cor, WheelPos.RIGHT_FRONT)
 
-    def _update_wheel_tilt(
-        self, cor: tuple[float, float] | None, pos: WheelPos
-    ) -> None:
+    def _update_wheel_tilt(self, cor: Vec2 | None, pos: WheelPos) -> None:
         if cor == None:
             self._wheels[pos].tilt = 0
             return
@@ -263,11 +256,11 @@ class Car:
         angle = (angle + 180) % 360 - 180
         return angle
 
-    def _angle_between(self, a: tuple[float, float], b: tuple[float, float]) -> float:
+    def _angle_between(self, a: Vec2, b: Vec2) -> float:
         if self._cor_y > 0:
-            return math.atan2(b[1] - a[1], b[0] - a[0]) - math.pi
+            return math.atan2(b.y - a.y, b.x - a.x) - math.pi
         else:
-            return math.atan2(a[1] - b[1], a[0] - b[0]) + math.pi
+            return math.atan2(a.y - b.y, a.x - b.x) + math.pi
 
     def _rotation_matrix(self) -> np.ndarray:
         angle = math.radians(self._rotation_degree)
