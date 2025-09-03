@@ -1,0 +1,8 @@
+[tool.pyright]
+reportMissingImports = false
+reportMissingTypeStubs = false
+typeCheckingMode = "basic"
+
+[[tool.mypy.overrides]]
+module = ["*"]
+ignore_missing_imports = true
