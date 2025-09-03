@@ -3,9 +3,29 @@ import math
 import random
 from enum import Enum
 from dataclasses import dataclass
+import numpy as np
 
 
 from .constants import SCALE
+
+
+class Vec2:
+    def __init__(self, x: float, y: float) -> None:
+        self.content = np.array([x, y])
+
+    @property
+    def x(self) -> float:
+        return self.content[0]
+
+    @property
+    def y(self) -> float:
+        return self.content[1]
+
+    def rotate(self, matrix: np.ndarray) -> None:
+        self.content = np.dot(matrix, self.content)
+
+    def add(self, vec: Vec2) -> None:
+        self.content += vec.content
 
 
 class Wheel:
@@ -248,3 +268,9 @@ class Car:
             return math.atan2(b[1] - a[1], b[0] - a[0]) - math.pi
         else:
             return math.atan2(a[1] - b[1], a[0] - b[0]) + math.pi
+
+    def _rotation_matrix(self) -> np.ndarray:
+        angle = math.radians(self._rotation_degree)
+        sin = math.sin(angle)
+        cos = math.cos(angle)
+        return np.array([[cos, -sin], [sin, cos]])
