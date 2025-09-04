@@ -3,6 +3,7 @@ from src.contexts.context import Context
 from src.vehicle.car import Car
 from src.view.render import Renderer
 from src.tracks.track import Track
+from src.tracks.displace_methods import DisplaceFractal
 
 
 def handle_input(ctx: Context) -> None:
@@ -32,7 +33,9 @@ def update(ctx: Context) -> None:
 def main() -> None:
     renderer = Renderer()
     ctx = Context()
-    ctx.track = Track(ctx.constants.WIDTH, ctx.constants.HEIGHT, 24)
+    ctx.track = Track(
+        ctx.constants.WIDTH, ctx.constants.HEIGHT, 100, DisplaceFractal(0.2)
+    )
     # ctx.add_car(car=Car(400, 300, 0))
 
     rl.InitWindow(ctx.constants.WIDTH, ctx.constants.HEIGHT, "Py-kart".encode())

@@ -34,10 +34,7 @@ class Renderer:
         )
 
     def _draw_track(self, track: Track) -> None:
-        for edge in track._edges:
+        for edge in track.edges:
             rl.DrawLineEx(
                 [edge.src.x, edge.src.y], [edge.dst.x, edge.dst.y], 2, rl.BEIGE
             )
-
-        for node in track._nodes:
-            rl.DrawCircle(node.x, node.y, 4, rl.BEIGE)
