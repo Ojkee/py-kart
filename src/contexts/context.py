@@ -1,19 +1,37 @@
-from src.tracks.track import Track
+from dataclasses import dataclass
 from src.vehicle.car import Car
+from src.tracks.track import Track
+
+
+@dataclass
+class Constants:
+    WINDOW_SCALE: int = 100
+    WIDTH: int = WINDOW_SCALE * 16
+    HEIGHT: int = WINDOW_SCALE * 9
+
+
+class State:
+    def __init__(self) -> None:
+        self.cars: list[Car] = []
+        self.track: Track | None = None
 
 
 class Context:
     def __init__(self) -> None:
-        self._cars: list[Car] = []
-        self._track: Track | None = None
+        self.constants: Constants = Constants()
+        self.state: State = State()
 
     def add_car(self, car: Car) -> None:
-        self._cars.append(car)
+        self.state.cars.append(car)
 
     @property
     def cars(self) -> list[Car]:
-        return self._cars
+        return self.state.cars
 
     @property
     def track(self) -> Track | None:
-        return self._track
+        return self.state.track
+
+    @track.setter
+    def track(self, value: Track) -> None:
+        self.state.track = value

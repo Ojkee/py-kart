@@ -10,8 +10,9 @@ class Renderer:
     def draw(self, track: Track, cars: list[Car]) -> None:
         rl.BeginDrawing()
         rl.DrawFPS(4, 4)
-
         rl.ClearBackground([51, 51, 51, 255])
+
+        self._draw_track(track)
         for car in cars:
             self._draw_car(car)
 
@@ -31,3 +32,12 @@ class Renderer:
         rl.DrawRectanglePro(
             (x - w2, y - h2, w, h), [w2, h2], car.rotation_degree, car.color
         )
+
+    def _draw_track(self, track: Track) -> None:
+        for edge in track._edges:
+            rl.DrawLineEx(
+                [edge.src.x, edge.src.y], [edge.dst.x, edge.dst.y], 2, rl.BEIGE
+            )
+
+        for node in track._nodes:
+            rl.DrawCircle(node.x, node.y, 4, rl.BEIGE)
