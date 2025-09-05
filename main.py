@@ -31,21 +31,23 @@ def update(ctx: Context) -> None:
 
 
 def main() -> None:
-    renderer = Renderer()
     ctx = Context()
+    renderer = Renderer(ctx.constants.WIDTH, ctx.constants.HEIGHT)
     ctx.track = Track(
         ctx.constants.WIDTH, ctx.constants.HEIGHT, 100, DisplaceFractal(0.2)
     )
     # ctx.add_car(car=Car(400, 300, 0))
 
-    rl.InitWindow(ctx.constants.WIDTH, ctx.constants.HEIGHT, "Py-kart".encode())
+    rl.InitWindow(ctx.constants.WIDTH, ctx.constants.HEIGHT, b"Py-kart")
     rl.SetTargetFPS(60)
+
+    if not ctx.track is None:
+        renderer.bake_track(ctx.track)
 
     while not rl.WindowShouldClose():
         # handle_input(ctx)
         # update(ctx)
-        if ctx.track:
-            renderer.draw(ctx.track, ctx.cars)
+        renderer.draw(ctx.cars)
 
 
 if __name__ == "__main__":

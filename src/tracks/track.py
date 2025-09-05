@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 import random
-import math
 import numpy as np
 
 from src.tracks.graph_structs import TrackNode, TrackEdge
@@ -20,6 +19,8 @@ class Track:
         displace_method: DisplaceMethod | None = None,
     ) -> None:
         self._checkpoints: int = checkpoints
+        self._width: int = width
+        self._height: int = height
         self._offset_x: int = width // 8
         self._offset_y: int = height // 8
         self._displace_method: DisplaceMethod = (
@@ -28,19 +29,25 @@ class Track:
 
         self._center_x: int = width // 2
         self._center_y: int = height // 2
+        self._center_node: TrackNode = TrackNode(self._center_x, self._center_y)
 
         self._nodes: list[TrackNode] = []
         self._edges: list[TrackEdge] = []
         self._inner_nodes: list[TrackNode] = []
+        self._track_nodes: list[TrackNode] = []
 
         self._generate_nodes(width, height, checkpoints)
         self._make_convex_hull(GrahamScan())
-        self._displace()
         self._insert_one_middle()
+        self._displace()
 
     @property
     def edges(self) -> list[TrackEdge]:
         return self._edges
+
+    @property
+    def track_nodes(self) -> list[TrackNode]:
+        return self._track_nodes
 
     def _generate_nodes(self, width: int, height: int, checkpoints: int) -> None:
         self._nodes.clear()
@@ -60,7 +67,7 @@ class Track:
         r_edge = self._edges.pop(r_edge_idx)
 
         def dist_to_center(node: TrackNode) -> float:
-            return math.hypot(node.x - self._center_x, node.y - self._center_y)
+            return TrackEdge(node, self._center_node).length()
 
         dists_to_center = list(map(dist_to_center, self._inner_nodes))
         r_node_idx = np.argmin(dists_to_center)
@@ -77,11 +84,25 @@ class Track:
             midy = (edge.src.y + edge.dst.y) // 2
             return TrackNode(midx, midy)
 
-        mids = zip(list(map(mid, self._edges)), self._edges)
-        displaced = list(map(self._displace_method, mids))
+        mids = zip(map(mid, self._edges), self._edges)
+        displaced = map(self._displace_method, mids)
 
-        value = []
-        print(displaced)
+        edges = []
         for mid_node, edge in zip(displaced, self._edges):
-            value.extend([TrackEdge(edge.src, mid_node), TrackEdge(mid_node, edge.dst)])
-        self._edges = value
+            edges.extend([TrackEdge(edge.src, mid_node), TrackEdge(mid_node, edge.dst)])
+        self._edges = edges
+
+    def _edges_to_sorted_nodes(self) -> list[TrackNode]:
+        start = self._edges[0].src
+        current = self._edges[0].dst
+        nodes = [start, current]
+        while len(nodes) < len(self._edges) + 1:
+            for edge in self._edges:
+                if edge.src == current:
+                    current = edge.dst
+                    nodes.append(current)
+        return nodes
+
+    def start_node(self) -> TrackNode:
+        assert len(self._edges) > 0
+        return self._edges[0].src
