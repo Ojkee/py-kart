@@ -41,8 +41,7 @@ def main() -> None:
     rl.InitWindow(ctx.constants.WIDTH, ctx.constants.HEIGHT, b"Py-kart")
     rl.SetTargetFPS(60)
 
-    if not ctx.track is None:
-        renderer.bake_track(ctx.track)
+    renderer.bake_track(ctx.track)
 
     while not rl.WindowShouldClose():
         # handle_input(ctx)

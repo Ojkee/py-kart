@@ -9,7 +9,9 @@ class Renderer:
         self._height = height
         self._track_texture: rl.RenderTexture | None = None
 
-    def bake_track(self, track: Track) -> None:
+    def bake_track(self, track: Track | None) -> None:
+        if track is None:
+            return
         nodes = track._edges_to_sorted_nodes()
         nodes_as_tuple = list(map(lambda node: (node.x, node.y), nodes))
         closed = nodes_as_tuple[-2:] + nodes_as_tuple + nodes_as_tuple[:2]
