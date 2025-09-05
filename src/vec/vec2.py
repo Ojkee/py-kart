@@ -1,3 +1,4 @@
+from __future__ import annotations
 import numpy as np
 
 
@@ -33,5 +34,6 @@ class Vec2:
     def add(self, vec: np.ndarray) -> None:
         self.content += vec
 
-    def added(self, vec: np.ndarray) -> np.ndarray:
-        return self.content + vec
+    def added(self, x: float, y: float) -> Vec2:
+        d = self.content + np.array([x, y])
+        return Vec2(d[0], d[1])

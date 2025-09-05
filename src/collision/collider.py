@@ -1,6 +1,9 @@
 import raylib as rl
+
+# import numpy as np
 import math
-import numpy as np
+
+from functools import cache
 
 from src.contexts.context import Context
 from src.rays.ray import Ray
@@ -13,34 +16,37 @@ class Collider:
 
     def update(self, ctx: Context) -> None:
         for car in ctx.cars:
-            for ray in car.rays:
-                angle_rad = math.radians(ray._angle_deg)
-                origin_color = rl.GetImageColor(
-                    self._track_image, int(ray.origin.x), int(ray.origin.y)
-                )
-                length: int = 8
-                dx = math.cos(angle_rad) * length
-                dy = math.sin(angle_rad) * length
-                hit_x = ray.origin.x + dx
-                hit_y = ray.origin.y + dy
-                hit_color = rl.GetImageColor(self._track_image, int(hit_x), int(hit_y))
+            self._update_car_rays(ctx, car.rays)
 
-                while (
-                    Collider.same_color(origin_color, hit_color)
+    def _update_car_rays(self, ctx: Context, rays: list[Ray]) -> None:
+        for ray in rays:
+            angle_rad = math.radians(ray._angle_deg)
+            origin_color = self._color_at(ray.origin.x, ray.origin.y)
+            length: int = 8
+            dx, dy = Collider.delta(angle_rad, length)
+            hit = ray.origin.added(dx, dy)
+
+            def shoud_grow() -> bool:
+                return (
+                    Collider.same_color(origin_color, self._color_at(hit.x, hit.y))
                     and length <= ctx.constants.MAX_RAY_LENGTH
-                ):
-                    hit_color = rl.GetImageColor(
-                        self._track_image,
-                        int(hit_x),
-                        int(hit_y),
-                    )
-                    length += 2
-                    dx = math.cos(angle_rad) * length
-                    dy = math.sin(angle_rad) * length
-                    hit_x = ray.origin.x + dx
-                    hit_y = ray.origin.y + dy
+                )
 
-                ray.hit = Vec2(hit_x, hit_y)
+            while shoud_grow():
+                length += 2
+                dx, dy = Collider.delta(angle_rad, length)
+                hit = ray.origin.added(dx, dy)
+            ray.hit = hit
+
+    def _color_at(self, x: float, y: float):
+        return rl.GetImageColor(self._track_image, int(x), int(y))
+
+    @classmethod
+    @cache
+    def delta(cls, angle: float, length: float) -> tuple[float, float]:
+        dx = math.cos(angle) * length
+        dy = math.sin(angle) * length
+        return dx, dy
 
     @classmethod
     def same_color(cls, lhs, rhs) -> bool:
