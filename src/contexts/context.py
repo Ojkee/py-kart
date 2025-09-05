@@ -8,6 +8,7 @@ class Constants:
     WINDOW_SCALE: int = 100
     WIDTH: int = WINDOW_SCALE * 16
     HEIGHT: int = WINDOW_SCALE * 9
+    MAX_RAY_LENGTH: int = 96
 
 
 class State:

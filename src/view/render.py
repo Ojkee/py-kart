@@ -1,4 +1,6 @@
 import raylib as rl
+from src.rays.ray import Ray
+from src.contexts.context import Context
 from src.vehicle.car import Car
 from src.tracks.track import Track
 
@@ -15,23 +17,22 @@ class Renderer:
         nodes = track._edges_to_sorted_nodes()
         nodes_as_tuple = list(map(lambda node: (node.x, node.y), nodes))
         closed = nodes_as_tuple[-2:] + nodes_as_tuple + nodes_as_tuple[:2]
-        track_texture = rl.LoadRenderTexture(self._width, self._height)
 
-        rl.BeginTextureMode(track_texture)
+        self._track_texture = rl.LoadRenderTexture(self._width, self._height)
+        rl.BeginTextureMode(self._track_texture)
         rl.ClearBackground([51, 51, 51, 255])
         rl.DrawSplineCatmullRom(closed, len(closed), 64, rl.BEIGE)
         rl.EndTextureMode()
-        self._track_texture = track_texture
 
-    def draw(self, cars: list[Car]) -> None:
+    def draw(self, ctx: Context) -> None:
         rl.BeginDrawing()
-        rl.ClearBackground([51, 51, 51, 255])
-        rl.DrawFPS(4, 4)
 
         self._draw_track()
-        for car in cars:
+        for car in ctx.cars:
             self._draw_car(car)
+            self._draw_rays(car.rays)
 
+        rl.DrawFPS(4, 4)
         rl.EndDrawing()
 
     def _draw_car(self, car: Car) -> None:
@@ -52,3 +53,13 @@ class Renderer:
     def _draw_track(self) -> None:
         if self._track_texture:
             rl.DrawTexture(self._track_texture.texture, 0, 0, rl.WHITE)
+
+    def _draw_rays(self, rays: list[Ray]) -> None:
+        for ray in rays:
+            if ray.hit:
+                rl.DrawLineEx(
+                    [int(ray.origin.x), int(ray.origin.y)],
+                    [int(ray.hit.x), int(ray.hit.y)],
+                    2.0,
+                    rl.RED,
+                )

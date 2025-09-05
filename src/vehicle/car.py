@@ -6,32 +6,9 @@ from dataclasses import dataclass
 import numpy as np
 
 
+from src.rays.ray import Ray
+from src.vec.vec2 import Vec2
 from .constants import SCALE
-
-
-class Vec2:
-    def __init__(self, x: float, y: float) -> None:
-        self.content = np.array([x, y], dtype=np.float32)
-
-    @property
-    def x(self) -> float:
-        return self.content[0]
-
-    @property
-    def y(self) -> float:
-        return self.content[1]
-
-    def rotate(self, matrix: np.ndarray) -> None:
-        self.content = np.dot(matrix, self.content)
-
-    def rotated(self, matrix: np.ndarray) -> np.ndarray:
-        return np.dot(matrix, self.content)
-
-    def add(self, vec: np.ndarray) -> None:
-        self.content += vec
-
-    def added(self, vec: np.ndarray) -> np.ndarray:
-        return self.content + vec
 
 
 class Wheel:
@@ -98,7 +75,11 @@ class Car:
     MIN_STEER_TILT = 1
 
     def __init__(
-        self, start_x: float, start_y: float, starting_rotation_degree: float = 0
+        self,
+        start_x: float,
+        start_y: float,
+        starting_rotation_degree: float = 0,
+        num_rays: int = 8,
     ) -> None:
         self._pos: Vec2 = Vec2(start_x, start_y)
 
@@ -107,7 +88,8 @@ class Car:
 
         self._cor_y: float = 0
 
-        self._wheels = self.init_wheels()
+        self._wheels = self._init_wheels()
+        self._rays: list[Ray] = self._init_rays(num_rays)
 
         self._color: list[int] = [
             random.randint(0, 255),
@@ -118,7 +100,7 @@ class Car:
 
         self.update()
 
-    def init_wheels(self) -> dict[WheelPos, Wheel]:
+    def _init_wheels(self) -> dict[WheelPos, Wheel]:
         w2 = self.WIDTH / 2
         h2 = self.HEIGHT / 2
         wheels = {
@@ -128,6 +110,18 @@ class Car:
             WheelPos.RIGHT_BACK: Wheel(self, w2, h2 - self.OFFSET_Y),
         }
         return wheels
+
+    def _init_rays(self, num_rays: int) -> list[Ray]:
+        assert num_rays > 0
+        rays: list[Ray] = []
+        for angle in range(0, 360, 360 // num_rays):
+            ray = Ray(int(self._pos.x), int(self._pos.y), angle)
+            rays.append(ray)
+        return rays
+
+    @property
+    def rays(self) -> list[Ray]:
+        return self._rays
 
     @property
     def rotation_degree(self) -> float:
@@ -183,6 +177,7 @@ class Car:
             )
             self._wheels[pos].move(new_pos[0], new_pos[1])
         self._update_wheels_tilt()
+        self._update_rays()
 
     def slow_down(self) -> None:
         if abs(self._velocity) < self.EPS:
@@ -209,6 +204,9 @@ class Car:
 
     def steer_right(self, force: float) -> None:
         self._cor_y = min(self._cor_y + force * SCALE, self.MAX_COR_Y)
+
+    def center_steering(self) -> None:
+        self._cor_y *= 0.9
 
     def rotate(self, angle_degree: float) -> None:
         self._rotation_degree += angle_degree
@@ -267,3 +265,8 @@ class Car:
         sin = math.sin(angle)
         cos = math.cos(angle)
         return np.array([[cos, -sin], [sin, cos]])
+
+    def _update_rays(self) -> None:
+        for ray in self._rays:
+            ray.angle_deg = ray.angle_deg_relative + self.rotation_degree
+            ray.origin = self._pos

@@ -1,8 +1,11 @@
 import raylib as rl
+from src.collision.collider import Collider
+from src.rays.ray import Ray
 from src.contexts.context import Context
 from src.vehicle.car import Car
 from src.view.render import Renderer
 from src.tracks.track import Track
+from src.vec.vec2 import Vec2
 from src.tracks.displace_methods import DisplaceFractal
 
 
@@ -17,11 +20,13 @@ def handle_input(ctx: Context) -> None:
             ctx.cars[0].steer_right(1)
         else:
             ctx.cars[0].steer_right(0.5)
+    else:
+        ctx.cars[0].center_steering()
 
     if rl.IsMouseButtonDown(rl.MOUSE_BUTTON_LEFT):
-        ctx.cars[0].accelerate(0.5)
+        ctx.cars[0].accelerate(0.3)
     elif rl.IsMouseButtonDown(rl.MOUSE_BUTTON_RIGHT):
-        ctx.cars[0].accelerate(-0.3)
+        ctx.cars[0].accelerate(-0.2)
     else:
         ctx.cars[0].slow_down()
 
@@ -36,17 +41,24 @@ def main() -> None:
     ctx.track = Track(
         ctx.constants.WIDTH, ctx.constants.HEIGHT, 100, DisplaceFractal(0.2)
     )
-    # ctx.add_car(car=Car(400, 300, 0))
+
+    ctx.add_car(car=Car(400, 300, 0, 8))
 
     rl.InitWindow(ctx.constants.WIDTH, ctx.constants.HEIGHT, b"Py-kart")
     rl.SetTargetFPS(60)
 
     renderer.bake_track(ctx.track)
 
+    collider = None
+    if renderer._track_texture:
+        collider = Collider(renderer._track_texture)
+
     while not rl.WindowShouldClose():
-        # handle_input(ctx)
-        # update(ctx)
-        renderer.draw(ctx.cars)
+        handle_input(ctx)
+        update(ctx)
+        if collider:
+            collider.update(ctx)
+        renderer.draw(ctx)
 
 
 if __name__ == "__main__":
