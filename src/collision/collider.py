@@ -1,9 +1,6 @@
 import raylib as rl
 
-# import numpy as np
 import math
-
-from functools import cache
 
 from src.contexts.context import Context
 from src.rays.ray import Ray
@@ -11,8 +8,13 @@ from src.vec.vec2 import Vec2
 
 
 class Collider:
-    def __init__(self, track) -> None:
-        self._track_image: rl.Image = rl.LoadImageFromTexture(track.texture)
+    def __init__(self, track_texture) -> None:
+        self._track_colors: list[rl.Color] = self._init_track_colors(track_texture)
+        self._track_width: int = track_texture.width
+
+    def _init_track_colors(self, track_texture):
+        track_image = rl.LoadImageFromTexture(track_texture)
+        return rl.LoadImageColors(track_image)
 
     def update(self, ctx: Context) -> None:
         for car in ctx.cars:
@@ -20,13 +22,12 @@ class Collider:
 
     def _update_car_rays(self, ctx: Context, rays: list[Ray]) -> None:
         for ray in rays:
-            angle_rad = math.radians(ray._angle_deg)
+            angle_rad = math.radians(ray.angle_deg)
             origin_color = self._color_at(ray.origin.x, ray.origin.y)
             length: int = 8
-            dx, dy = Collider.delta(angle_rad, length)
-            hit = ray.origin.added(dx, dy)
+            hit = Collider.ray_point(ray.origin, angle_rad, length)
 
-            def shoud_grow() -> bool:
+            def should_grow() -> bool:
                 return (
                     Collider.in_range(
                         hit.x, hit.y, ctx.constants.WIDTH, ctx.constants.HEIGHT
@@ -35,25 +36,28 @@ class Collider:
                     and length <= ctx.constants.MAX_RAY_LENGTH
                 )
 
-            while shoud_grow():
+            while should_grow():
                 length += 2
-                dx, dy = Collider.delta(angle_rad, length)
-                hit = ray.origin.added(dx, dy)
+                hit = Collider.ray_point(ray.origin, angle_rad, length)
             ray.hit = hit
 
     def _color_at(self, x: float, y: float):
-        return rl.GetImageColor(self._track_image, int(x), int(y))
+        return self._track_colors[int(y) * self._track_width + int(x)]
 
     @classmethod
-    @cache
     def delta(cls, angle: float, length: float) -> tuple[float, float]:
         dx = math.cos(angle) * length
         dy = math.sin(angle) * length
         return dx, dy
 
     @classmethod
+    def ray_point(cls, origin: Vec2, angle_rad: float, length: float) -> Vec2:
+        dx, dy = Collider.delta(angle_rad, length)
+        return origin.added(dx, dy)
+
+    @classmethod
     def same_color(cls, lhs, rhs) -> bool:
-        return lhs.r == rhs.r and lhs.g == rhs.g and lhs.b == lhs.b
+        return lhs.r == rhs.r and lhs.g == rhs.g and lhs.b == rhs.b
 
     @classmethod
     def in_range(cls, x, y, width, height) -> bool:

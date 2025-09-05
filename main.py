@@ -51,7 +51,7 @@ def main() -> None:
 
     collider = None
     if renderer._track_texture:
-        collider = Collider(renderer._track_texture)
+        collider = Collider(renderer._track_texture.texture)
 
     while not rl.WindowShouldClose():
         handle_input(ctx)
