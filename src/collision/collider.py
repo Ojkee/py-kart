@@ -28,7 +28,10 @@ class Collider:
 
             def shoud_grow() -> bool:
                 return (
-                    Collider.same_color(origin_color, self._color_at(hit.x, hit.y))
+                    Collider.in_range(
+                        hit.x, hit.y, ctx.constants.WIDTH, ctx.constants.HEIGHT
+                    )
+                    and Collider.same_color(origin_color, self._color_at(hit.x, hit.y))
                     and length <= ctx.constants.MAX_RAY_LENGTH
                 )
 
