@@ -12,15 +12,18 @@ class Constants:
 
 
 class State:
-    def __init__(self) -> None:
+    def __init__(self, track: Track) -> None:
         self.cars: list[Car] = []
-        self.track: Track | None = None
+        self.track: Track = track
 
 
 class Context:
     def __init__(self) -> None:
         self.constants: Constants = Constants()
-        self.state: State = State()
+        self.state: State = State(self._init_track())
+
+    def _init_track(self) -> Track:
+        return Track(self.constants.WIDTH, self.constants.HEIGHT, 100)
 
     def add_car(self, car: Car) -> None:
         self.state.cars.append(car)
@@ -30,7 +33,7 @@ class Context:
         return self.state.cars
 
     @property
-    def track(self) -> Track | None:
+    def track(self) -> Track:
         return self.state.track
 
     @track.setter

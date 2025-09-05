@@ -9,11 +9,9 @@ class Renderer:
     def __init__(self, width: int, height: int) -> None:
         self._width = width
         self._height = height
-        self._track_texture: rl.RenderTexture | None = None
+        self._track_texture: rl.RenderTexture
 
-    def bake_track(self, track: Track | None) -> None:
-        if track is None:
-            return
+    def bake_track(self, track: Track) -> None:
         nodes = track._edges_to_sorted_nodes()
         nodes_as_tuple = list(map(lambda node: (node.x, node.y), nodes))
         closed = nodes_as_tuple[-2:] + nodes_as_tuple + nodes_as_tuple[:2]
@@ -51,8 +49,7 @@ class Renderer:
         )
 
     def _draw_track(self) -> None:
-        if self._track_texture:
-            rl.DrawTexture(self._track_texture.texture, 0, 0, rl.WHITE)
+        rl.DrawTexture(self._track_texture.texture, 0, 0, rl.WHITE)
 
     def _draw_rays(self, rays: list[Ray]) -> None:
         for ray in rays:

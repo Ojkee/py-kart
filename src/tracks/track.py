@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 import random
+import math
 import numpy as np
 
 from src.tracks.graph_structs import TrackNode, TrackEdge
@@ -18,6 +19,7 @@ class Track:
         checkpoints: int,
         displace_method: DisplaceMethod | None = None,
     ) -> None:
+        assert checkpoints > 2
         self._checkpoints: int = checkpoints
         self._width: int = width
         self._height: int = height
@@ -103,6 +105,10 @@ class Track:
                     nodes.append(current)
         return nodes
 
-    def start_node(self) -> TrackNode:
-        assert len(self._edges) > 0
+    def starting_node(self) -> TrackNode:
         return self._edges[0].src
+
+    def starting_angle_degree(self) -> float:
+        a = self._edges[0].src
+        b = self._edges[0].dst
+        return -math.degrees(math.atan2(b.y - a.y, b.x - a.x))

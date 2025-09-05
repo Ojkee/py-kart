@@ -38,26 +38,22 @@ def update(ctx: Context) -> None:
 def main() -> None:
     ctx = Context()
     renderer = Renderer(ctx.constants.WIDTH, ctx.constants.HEIGHT)
-    ctx.track = Track(
-        ctx.constants.WIDTH, ctx.constants.HEIGHT, 100, DisplaceFractal(0.2)
-    )
 
-    ctx.add_car(car=Car(400, 300, 0, 8))
+    start_node = ctx.track.starting_node()
+    start_angle = ctx.track.starting_angle_degree()
+    ctx.add_car(car=Car(start_node.x, start_node.y, start_angle, 8))
 
     rl.InitWindow(ctx.constants.WIDTH, ctx.constants.HEIGHT, b"Py-kart")
     rl.SetTargetFPS(60)
 
     renderer.bake_track(ctx.track)
 
-    collider = None
-    if renderer._track_texture:
-        collider = Collider(renderer._track_texture.texture)
+    collider = Collider(renderer._track_texture.texture)
 
     while not rl.WindowShouldClose():
         handle_input(ctx)
         update(ctx)
-        if collider:
-            collider.update(ctx)
+        collider.update(ctx)
         renderer.draw(ctx)
 
 
