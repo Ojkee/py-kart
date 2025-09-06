@@ -1,44 +1,56 @@
 import raylib as rl
-from src.controllers.controller import Player
+from src.controllers.controller import AI, Player
 from src.collision.collider import Collider
 from src.contexts.context import Context
 from src.vehicle.car import Car
 from src.view.render import Renderer
 
 
-def handle_input(ctx: Context) -> None:
-    for player in ctx.players:
-        for command in player.handle_input():
-            command.execute()
+class Game:
+    def __init__(self, num_ai: int = 0) -> None:
+        self._num_ai = num_ai
+        self.ctx = Context()
+        self.renderer = Renderer(self.ctx.constants.WIDTH, self.ctx.constants.HEIGHT)
+        self.collider: Collider
 
+        self._init(self.ctx, self.renderer)
 
-def update(ctx: Context) -> None:
-    for car in ctx.cars:
-        car.update()
-        car.move()
+    def _init(self, ctx: Context, renderer: Renderer) -> None:
+        start_node = self.ctx.track.starting_node()
+        start_angle = self.ctx.track.starting_angle_degree()
 
+        self.ctx.add_player(Player(Car(start_node.x, start_node.y, start_angle, 8)))
+        for _ in range(self._num_ai):
+            ai_car = Car(start_node.x, start_node.y, start_angle, 8)
+            ai = AI(ai_car)
+            self.ctx.add_player(ai)
 
-def main() -> None:
-    ctx = Context()
-    renderer = Renderer(ctx.constants.WIDTH, ctx.constants.HEIGHT)
+        print(self.ctx.cars)
 
-    start_node = ctx.track.starting_node()
-    start_angle = ctx.track.starting_angle_degree()
-    ctx.add_player(Player(Car(start_node.x, start_node.y, start_angle, 8)))
+        rl.InitWindow(ctx.constants.WIDTH, ctx.constants.HEIGHT, b"Py-kart")
+        rl.SetTargetFPS(60)
 
-    rl.InitWindow(ctx.constants.WIDTH, ctx.constants.HEIGHT, b"Py-kart")
-    rl.SetTargetFPS(60)
+        renderer.bake_track(ctx.track)
 
-    renderer.bake_track(ctx.track)
+        self.collider = Collider(renderer._track_texture.texture)
 
-    collider = Collider(renderer._track_texture.texture)
+    def run(self) -> None:
+        while not rl.WindowShouldClose():
+            self._handle_input()
+            self._update()
+            self.renderer.draw(self.ctx)
 
-    while not rl.WindowShouldClose():
-        handle_input(ctx)
-        update(ctx)
-        collider.update(ctx)
-        renderer.draw(ctx)
+    def _handle_input(self) -> None:
+        for player in self.ctx.players:
+            for command in player.handle_input():
+                command.execute()
+
+    def _update(self) -> None:
+        self.collider.update(self.ctx)
+        for car in self.ctx.cars:
+            car.update()
 
 
 if __name__ == "__main__":
-    main()
+    game = Game(16)
+    game.run()
