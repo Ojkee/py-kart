@@ -1,5 +1,6 @@
 import raylib as rl
-from src.controllers.controller import AI, Player
+from src.controllers.player import Player
+from src.controllers.ai import AI
 from src.collision.collider import Collider
 from src.contexts.context import Context
 from src.vehicle.car import Car
@@ -7,7 +8,8 @@ from src.view.render import Renderer
 
 
 class Game:
-    def __init__(self, num_ai: int = 0) -> None:
+    def __init__(self, *, playable: bool = False, num_ai: int = 0) -> None:
+        self._playable = playable
         self._num_ai = num_ai
         self.ctx = Context()
         self.renderer = Renderer(self.ctx.constants.WIDTH, self.ctx.constants.HEIGHT)
@@ -19,13 +21,13 @@ class Game:
         start_node = self.ctx.track.starting_node()
         start_angle = self.ctx.track.starting_angle_degree()
 
-        self.ctx.add_player(Player(Car(start_node.x, start_node.y, start_angle, 8)))
+        if self._playable:
+            self.ctx.add_player(Player(Car(start_node.x, start_node.y, start_angle, 8)))
+
         for _ in range(self._num_ai):
             ai_car = Car(start_node.x, start_node.y, start_angle, 8)
             ai = AI(ai_car)
             self.ctx.add_player(ai)
-
-        print(self.ctx.cars)
 
         rl.InitWindow(ctx.constants.WIDTH, ctx.constants.HEIGHT, b"Py-kart")
         rl.SetTargetFPS(60)
@@ -52,5 +54,5 @@ class Game:
 
 
 if __name__ == "__main__":
-    game = Game(16)
+    game = Game(playable=False, num_ai=2)
     game.run()
