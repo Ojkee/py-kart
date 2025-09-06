@@ -2,7 +2,6 @@ import raylib as rl
 from src.rays.ray import Ray
 from src.contexts.context import Context
 from src.vehicle.car import Car
-from src.tracks.track import Track
 
 
 class Renderer:
@@ -11,15 +10,17 @@ class Renderer:
         self._height = height
         self._track_texture: rl.RenderTexture
 
-    def bake_track(self, track: Track) -> None:
-        nodes = track._edges_to_sorted_nodes()
+    def bake_track(self, ctx: Context) -> None:
+        nodes = ctx.track.edges_to_sorted_nodes()
         nodes_as_tuple = list(map(lambda node: (node.x, node.y), nodes))
         closed = nodes_as_tuple[-2:] + nodes_as_tuple + nodes_as_tuple[:2]
 
         self._track_texture = rl.LoadRenderTexture(self._width, self._height)
         rl.BeginTextureMode(self._track_texture)
-        rl.ClearBackground([51, 51, 51, 255])
-        rl.DrawSplineCatmullRom(closed, len(closed), 64, rl.BEIGE)
+        rl.ClearBackground(ctx.constants.BG_COLOR)
+        rl.DrawSplineCatmullRom(
+            closed, len(closed), ctx.constants.TRACK_WIDTH, ctx.constants.TRACK_COLOR
+        )
         rl.EndTextureMode()
 
     def draw(self, ctx: Context) -> None:

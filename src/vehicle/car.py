@@ -79,7 +79,7 @@ class Car:
         start_x: float,
         start_y: float,
         starting_rotation_degree: float = 0,
-        num_rays: int = 8,
+        num_rays: int = 0,
     ) -> None:
         self._pos: Vec2 = Vec2(start_x, start_y)
 
@@ -98,6 +98,8 @@ class Car:
             255,
         ]
 
+        self.active: bool = True
+
         self.update()
 
     def _init_wheels(self) -> dict[WheelPos, Wheel]:
@@ -112,10 +114,13 @@ class Car:
         return wheels
 
     def _init_rays(self, num_rays: int) -> list[Ray]:
-        assert num_rays > 0
+        if num_rays <= 0:
+            return []
+
+        angle = 180 / (num_rays - 1)
         rays: list[Ray] = []
-        for angle in range(0, 360, 360 // num_rays):
-            ray = Ray(int(self._pos.x), int(self._pos.y), angle)
+        for i in range(0, num_rays):
+            ray = Ray(int(self._pos.x), int(self._pos.y), i * angle + 180)
             rays.append(ray)
         return rays
 

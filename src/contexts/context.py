@@ -11,6 +11,11 @@ class Constants:
     HEIGHT: int = WINDOW_SCALE * 9
     MAX_RAY_LENGTH: int = 96
 
+    TRACK_WIDTH: int = 64
+
+    TRACK_COLOR = (211, 176, 131, 255)
+    BG_COLOR = (51, 51, 51, 255)
+
 
 class State:
     def __init__(self, track: Track) -> None:
@@ -24,7 +29,7 @@ class Context:
         self.state: State = State(self._init_track())
 
     def _init_track(self) -> Track:
-        return Track(self.constants.WIDTH, self.constants.HEIGHT, 100)
+        return Track(self.constants.WIDTH, self.constants.HEIGHT, 30)
 
     def add_player(self, player: Controller) -> None:
         self.state.players.append(player)

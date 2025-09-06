@@ -94,7 +94,7 @@ class Track:
             edges.extend([TrackEdge(edge.src, mid_node), TrackEdge(mid_node, edge.dst)])
         self._edges = edges
 
-    def _edges_to_sorted_nodes(self) -> list[TrackNode]:
+    def edges_to_sorted_nodes(self) -> list[TrackNode]:
         start = self._edges[0].src
         current = self._edges[0].dst
         nodes = [start, current]

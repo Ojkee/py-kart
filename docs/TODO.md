@@ -3,7 +3,7 @@
 ### Essential
 - [x] Splines from given track
 - [x] Rays that detect walls
-- [ ] Command pattern for controlling cars
+- [x] Command pattern for controlling cars
 - [ ] Track checkpoint tracking system
 - [ ] Generative AI that controlls Cars
 

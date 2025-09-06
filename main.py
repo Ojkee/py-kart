@@ -22,17 +22,17 @@ class Game:
         start_angle = self.ctx.track.starting_angle_degree()
 
         if self._playable:
-            self.ctx.add_player(Player(Car(start_node.x, start_node.y, start_angle, 8)))
+            self.ctx.add_player(Player(Car(start_node.x, start_node.y, start_angle, 7)))
 
         for _ in range(self._num_ai):
-            ai_car = Car(start_node.x, start_node.y, start_angle, 8)
+            ai_car = Car(start_node.x, start_node.y, start_angle, 7)
             ai = AI(ai_car)
             self.ctx.add_player(ai)
 
         rl.InitWindow(ctx.constants.WIDTH, ctx.constants.HEIGHT, b"Py-kart")
         rl.SetTargetFPS(60)
 
-        renderer.bake_track(ctx.track)
+        renderer.bake_track(ctx)
 
         self.collider = Collider(renderer._track_texture.texture)
 
@@ -50,9 +50,10 @@ class Game:
     def _update(self) -> None:
         self.collider.update(self.ctx)
         for car in self.ctx.cars:
-            car.update()
+            if car.active:
+                car.update()
 
 
 if __name__ == "__main__":
-    game = Game(playable=False, num_ai=2)
+    game = Game(playable=True, num_ai=0)
     game.run()

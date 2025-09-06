@@ -6,6 +6,8 @@ from src.contexts.context import Context
 from src.rays.ray import Ray
 from src.vec.vec2 import Vec2
 
+from functools import cache
+
 
 class Collider:
     def __init__(self, track_texture) -> None:
@@ -17,7 +19,16 @@ class Collider:
         return rl.LoadImageColors(track_image)
 
     def update(self, ctx: Context) -> None:
+        track_color = Collider.track_rl_color(ctx.constants.TRACK_COLOR)
+
         for car in ctx.cars:
+            if not car.active:
+                continue
+
+            current_color = self._color_at(car._pos.x, car._pos.y)
+            if not Collider.same_color(current_color, track_color):
+                car.active = False
+                continue
             self._update_car_rays(ctx, car.rays)
 
     def _update_car_rays(self, ctx: Context, rays: list[Ray]) -> None:
@@ -40,6 +51,11 @@ class Collider:
                 length += 2
                 hit = Collider.ray_point(ray.origin, angle_rad, length)
             ray.hit = hit
+
+    @classmethod
+    @cache
+    def track_rl_color(cls, color: tuple[int, int, int, int]):
+        return rl.ffi.new("struct Color *", color)
 
     def _color_at(self, x: float, y: float):
         return self._track_colors[int(y) * self._track_width + int(x)]
