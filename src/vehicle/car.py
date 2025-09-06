@@ -100,6 +100,8 @@ class Car:
 
         self.active: bool = True
 
+        self.checkpoints_matched: int = 1
+
         self.update()
 
     def _init_wheels(self) -> dict[WheelPos, Wheel]:

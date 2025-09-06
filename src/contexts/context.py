@@ -12,9 +12,16 @@ class Constants:
     MAX_RAY_LENGTH: int = 96
 
     TRACK_WIDTH: int = 64
+    CHECKPOINT_RADIUS: int = (TRACK_WIDTH - 4) // 2
 
     TRACK_COLOR = (211, 176, 131, 255)
     BG_COLOR = (51, 51, 51, 255)
+    CHECKPOINT_COLOR = (144, 82, 82, 255)
+
+
+@dataclass
+class Debug:
+    TRACK_NODES: bool = False
 
 
 class State:
@@ -26,6 +33,7 @@ class State:
 class Context:
     def __init__(self) -> None:
         self.constants: Constants = Constants()
+        self.debug: Debug = Debug()
         self.state: State = State(self._init_track())
 
     def _init_track(self) -> Track:

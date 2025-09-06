@@ -1,10 +1,12 @@
 import raylib as rl
+
 from src.controllers.player import Player
 from src.controllers.ai import AI
 from src.collision.collider import Collider
 from src.contexts.context import Context
 from src.vehicle.car import Car
 from src.view.render import Renderer
+from src.vec.vec2 import Vec2
 
 
 class Game:
@@ -22,7 +24,7 @@ class Game:
         start_angle = self.ctx.track.starting_angle_degree()
 
         if self._playable:
-            self.ctx.add_player(Player(Car(start_node.x, start_node.y, start_angle, 7)))
+            self.ctx.add_player(Player(Car(start_node.x, start_node.y, start_angle)))
 
         for _ in range(self._num_ai):
             ai_car = Car(start_node.x, start_node.y, start_angle, 7)

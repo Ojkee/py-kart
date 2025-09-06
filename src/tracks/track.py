@@ -2,6 +2,7 @@
 # https://bitesofcode.wordpress.com/2020/04/09/procedural-racetrack-generation/
 
 from __future__ import annotations
+from functools import cache
 import random
 import math
 import numpy as np
@@ -9,6 +10,7 @@ import numpy as np
 from src.tracks.graph_structs import TrackNode, TrackEdge
 from src.tracks.convex_hull import ConvexHullMethod, GrahamScan
 from src.tracks.displace_methods import DisplaceMethod, DisplaceAlongNormal
+from src.vec.vec2 import Vec2
 
 
 class Track:
@@ -94,6 +96,7 @@ class Track:
             edges.extend([TrackEdge(edge.src, mid_node), TrackEdge(mid_node, edge.dst)])
         self._edges = edges
 
+    @cache
     def edges_to_sorted_nodes(self) -> list[TrackNode]:
         start = self._edges[0].src
         current = self._edges[0].dst
@@ -106,9 +109,15 @@ class Track:
         return nodes
 
     def starting_node(self) -> TrackNode:
-        return self._edges[0].src
+        return self.edges_to_sorted_nodes()[0]
 
     def starting_angle_degree(self) -> float:
         a = self._edges[0].src
         b = self._edges[0].dst
         return -math.degrees(math.atan2(b.y - a.y, b.x - a.x))
+
+    @cache
+    def checkpoint(self, idx: int) -> Vec2:
+        nodes = self.edges_to_sorted_nodes()
+        idx %= len(nodes)
+        return Vec2(nodes[idx].x, nodes[idx].y)

@@ -7,6 +7,9 @@ class TrackNode:
     x: int
     y: int
 
+    def as_tuple(self) -> tuple[int, int]:
+        return self.x, self.y
+
 
 @dataclass
 class TrackEdge:

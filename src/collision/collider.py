@@ -5,6 +5,7 @@ import math
 from src.contexts.context import Context
 from src.rays.ray import Ray
 from src.vec.vec2 import Vec2
+from src.vehicle.car import Car
 
 from functools import cache
 
@@ -29,7 +30,9 @@ class Collider:
             if not Collider.same_color(current_color, track_color):
                 car.active = False
                 continue
+
             self._update_car_rays(ctx, car.rays)
+            self._update_checkpoint(ctx, car)
 
     def _update_car_rays(self, ctx: Context, rays: list[Ray]) -> None:
         for ray in rays:
@@ -51,6 +54,17 @@ class Collider:
                 length += 2
                 hit = Collider.ray_point(ray.origin, angle_rad, length)
             ray.hit = hit
+
+    def _update_checkpoint(self, ctx: Context, car: Car) -> None:
+        next_idx: int = car.checkpoints_matched
+        next_checkpoint: Vec2 = ctx.track.checkpoint(next_idx)
+        collision = rl.CheckCollisionCircleRec(
+            (next_checkpoint.x, next_checkpoint.y),
+            ctx.constants.CHECKPOINT_RADIUS,
+            car.rect,
+        )
+        if collision:
+            car.checkpoints_matched += 1
 
     @classmethod
     @cache
