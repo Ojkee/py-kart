@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from src.vehicle.car import Car
+from src.controllers.controller import Controller
 from src.tracks.track import Track
+from src.vehicle.car import Car
 
 
 @dataclass
@@ -13,7 +14,7 @@ class Constants:
 
 class State:
     def __init__(self, track: Track) -> None:
-        self.cars: list[Car] = []
+        self.players: list[Controller] = []
         self.track: Track = track
 
 
@@ -25,12 +26,12 @@ class Context:
     def _init_track(self) -> Track:
         return Track(self.constants.WIDTH, self.constants.HEIGHT, 100)
 
-    def add_car(self, car: Car) -> None:
-        self.state.cars.append(car)
+    def add_player(self, player: Controller) -> None:
+        self.state.players.append(player)
 
     @property
-    def cars(self) -> list[Car]:
-        return self.state.cars
+    def players(self) -> list[Controller]:
+        return self.state.players
 
     @property
     def track(self) -> Track:
@@ -39,3 +40,7 @@ class Context:
     @track.setter
     def track(self, value: Track) -> None:
         self.state.track = value
+
+    @property
+    def cars(self) -> list[Car]:
+        return list(map(lambda player: player._car, self.state.players))

@@ -169,7 +169,6 @@ class Car:
         return unit_direction * self._velocity
 
     def update(self) -> None:
-        self.move()
         for pos, wheel in self._wheels.items():
             new_pos = (
                 np.dot(self._rotation_matrix(), wheel._car_relative_pos.content)
