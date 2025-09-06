@@ -112,9 +112,10 @@ class Track:
         return self.edges_to_sorted_nodes()[0]
 
     def starting_angle_degree(self) -> float:
-        a = self._edges[0].src
-        b = self._edges[0].dst
-        return -math.degrees(math.atan2(b.y - a.y, b.x - a.x))
+        nodes = self.edges_to_sorted_nodes()
+        a = nodes[0]
+        b = nodes[1]
+        return math.degrees(math.atan2(b.y - a.y, b.x - a.x)) + 90
 
     @cache
     def checkpoint(self, idx: int) -> Vec2:
