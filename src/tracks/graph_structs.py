@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import math
 
 
-@dataclass
+@dataclass(frozen=True)
 class TrackNode:
     x: int
     y: int
@@ -11,7 +11,7 @@ class TrackNode:
         return self.x, self.y
 
 
-@dataclass
+@dataclass(frozen=True)
 class TrackEdge:
     src: TrackNode
     dst: TrackNode

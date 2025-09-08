@@ -33,8 +33,8 @@ class Renderer:
             self._draw_car(car)
             self._draw_rays(car.rays)
 
-            # TODO: DEBUG-Remove
-            self._draw_next_checkpoint(ctx, car)
+            if ctx.debug.TRACK_NODES:
+                self._draw_next_checkpoint(ctx, car)
 
         rl.DrawFPS(4, 4)
         rl.EndDrawing()
