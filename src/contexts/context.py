@@ -21,7 +21,7 @@ class Constants:
 
 @dataclass
 class Debug:
-    TRACK_NODES: bool = True
+    TRACK_NODES: bool = False
 
 
 class State:

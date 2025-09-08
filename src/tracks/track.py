@@ -100,7 +100,7 @@ class Track:
         return self._edges_to_sorted_nodes(tuple(self._edges))
 
     @cache
-    def _edges_to_sorted_nodes(self, edges: list[TrackEdge]) -> list[TrackNode]:
+    def _edges_to_sorted_nodes(self, edges: tuple[TrackEdge, ...]) -> list[TrackNode]:
         start = edges[0].src
         current = edges[0].dst
         nodes = [start, current]
