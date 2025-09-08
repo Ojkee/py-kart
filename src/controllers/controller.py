@@ -15,3 +15,11 @@ class Controller(ABC):
     @abstractmethod
     def handle_input(self) -> list[Command]:
         pass
+
+    @abstractmethod
+    def update_score(self) -> None:
+        pass
+
+    @abstractmethod
+    def add_score(self, value: int) -> None:
+        pass

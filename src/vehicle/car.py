@@ -119,12 +119,15 @@ class Car:
         if num_rays <= 0:
             return []
 
-        angle = 180 / (num_rays - 1)
+        angle = 360 / num_rays
         rays: list[Ray] = []
         for i in range(0, num_rays):
-            ray = Ray(int(self._pos.x), int(self._pos.y), i * angle + 180)
+            ray = Ray(int(self._pos.x), int(self._pos.y), i * angle)
             rays.append(ray)
         return rays
+
+    def __bool__(self) -> bool:
+        return self.active
 
     @property
     def rays(self) -> list[Ray]:

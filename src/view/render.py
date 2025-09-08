@@ -31,7 +31,8 @@ class Renderer:
         self._draw_track(ctx)
         for car in ctx.cars:
             self._draw_car(car)
-            self._draw_rays(car.rays)
+            if ctx.constants.DRAW_RAYS:
+                self._draw_rays(car.rays)
 
             if ctx.debug.TRACK_NODES:
                 self._draw_next_checkpoint(ctx, car)

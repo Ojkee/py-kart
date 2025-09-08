@@ -6,6 +6,9 @@ from src.vehicle.car import Car
 
 @dataclass
 class Constants:
+    TARGET_FPS: int = 60
+    LEARN_TIME_SEC: int = 10
+
     WINDOW_SCALE: int = 100
     WIDTH: int = WINDOW_SCALE * 16
     HEIGHT: int = WINDOW_SCALE * 9
@@ -17,6 +20,8 @@ class Constants:
     TRACK_COLOR = (211, 176, 131, 255)
     BG_COLOR = (51, 51, 51, 255)
     CHECKPOINT_COLOR = (144, 82, 82, 255)
+
+    DRAW_RAYS: bool = True
 
 
 @dataclass

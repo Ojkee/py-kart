@@ -1,3 +1,4 @@
+import math
 from src.vec.vec2 import Vec2
 
 
@@ -6,7 +7,6 @@ class Ray:
         self._origin: Vec2 = Vec2(x, y)
         self._angle_deg: float = angle_deg
         self._angle_deg_relative: float = angle_deg
-        self._length: float = 0
 
         self._hit: Vec2 | None = None
 
@@ -44,3 +44,8 @@ class Ray:
 
     def __repr__(self) -> str:
         return f"{self.origin} -> {self.hit}\n"
+
+    def __abs__(self) -> float:
+        if not self.hit:
+            return 0.0
+        return math.hypot(self.hit.x - self.origin.x, self.hit.y - self.origin.y)

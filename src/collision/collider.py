@@ -22,17 +22,18 @@ class Collider:
     def update(self, ctx: Context) -> None:
         track_color = Collider.track_rl_color(ctx.constants.TRACK_COLOR)
 
-        for car in ctx.cars:
-            if not car.active:
+        for player in ctx.players:
+            if not player._car.active:
                 continue
 
-            current_color = self._color_at(car._pos.x, car._pos.y)
+            current_color = self._color_at(player._car._pos.x, player._car._pos.y)
             if not Collider.same_color(current_color, track_color):
-                car.active = False
+                player._car.active = False
+                player.add_score(-1)
                 continue
 
-            self._update_car_rays(ctx, car.rays)
-            self._update_checkpoint(ctx, car)
+            self._update_car_rays(ctx, player._car.rays)
+            self._update_checkpoint(ctx, player._car)
 
     def _update_car_rays(self, ctx: Context, rays: list[Ray]) -> None:
         for ray in rays:

@@ -7,6 +7,7 @@ from src.commands.command import *
 class Player(Controller):
     def __init__(self, car: Car) -> None:
         super().__init__(car)
+        self._score: int = 0
 
     def handle_input(self) -> list[Command]:
         commands: list[Command] = []
@@ -30,3 +31,9 @@ class Player(Controller):
         else:
             commands.append(IdleMovement(self._car))
         return commands
+
+    def update_score(self) -> None:
+        self._score = self._car.checkpoints_matched
+
+    def add_score(self, value: int) -> None:
+        self._score += value
