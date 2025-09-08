@@ -4,8 +4,8 @@
 - [x] Splines from given track
 - [x] Rays that detect walls
 - [x] Command pattern for controlling cars
-- [ ] Track checkpoint tracking system
-- [ ] Generative AI that controlls Cars
+- [x] Track checkpoint tracking system
+- [x] Neuroevolutional AI that controlls Cars
 
 ### Extras
 - [ ] Save/Load Track
