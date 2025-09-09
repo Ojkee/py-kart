@@ -15,15 +15,15 @@ class NeatAI(Controller):
         self.net: nn.FeedForwardNetwork = net
         self._steering_commands: list[Command] = [
             SteerLeft(self._car, 0.5),
-            SteerLeft(self._car, 1.0),
-            SteerRight(self._car, 0.5),
-            SteerRight(self._car, 1.0),
+            # SteerLeft(self._car, 1.0),
+            # SteerRight(self._car, 1.0),
             IdleSteer(self._car),
+            SteerRight(self._car, 0.5),
         ]
         self._movement_commands: list[Command] = [
-            Accelerate(self._car, 0.3),
             MoveBackOrBreak(self._car, 0.2),
             IdleMovement(self._car),
+            Accelerate(self._car, 0.3),
         ]
 
     def handle_input(self) -> list[Command]:
@@ -42,11 +42,9 @@ class NeatAI(Controller):
         )
         output = np.array(self.net.activate(input))
 
-        steering = NeatAI.softmax(output[3:])
-        steer_idx = np.argmax(steering)
-
-        movement = NeatAI.softmax(output[:3])
-        movement_idx = np.argmax(movement)
+        # Outputs are in range (-1,1)
+        steer_idx = round((output[0] + 1) / 2 * (len(self._steering_commands) - 1))
+        movement_idx = round((output[1] + 1) / 2 * (len(self._movement_commands) - 1))
 
         return [
             self._steering_commands[steer_idx],
@@ -54,16 +52,14 @@ class NeatAI(Controller):
         ]
 
     def update_score(self) -> None:
-        if abs(self._car._velocity) < 0.1:
-            self.genome.fitness -= 0.2
-        self.genome.fitness = self._car.checkpoints_matched * 2
+        self.genome.fitness = self._car.checkpoints_matched * 10
 
     def add_score(self, value: int) -> None:
         self.genome.fitness += value
 
     def deactivate(self) -> None:
         d = self._next_checkpoint_delta()
-        dist = math.hypot(d.x, d.y) / 200
+        dist = math.hypot(d.x, d.y) / 100
         self.genome.fitness -= dist
         return super().deactivate()
 
