@@ -6,6 +6,7 @@
 - [x] Command pattern for controlling cars
 - [x] Track checkpoint tracking system
 - [x] Neuroevolutional AI that controlls Cars
+- [ ] Delta time
 
 ### Extras
 - [ ] Save/Load Track

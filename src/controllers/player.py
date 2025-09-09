@@ -37,3 +37,6 @@ class Player(Controller):
 
     def add_score(self, value: int) -> None:
         self._score += value
+
+    def deactivate(self) -> None:
+        return super().deactivate()

@@ -59,6 +59,8 @@ class Game:
             player.update_score()
 
     def eval_genomes(self, genomes, config):
+        global CUR_GEN, MAX_GEN
+        CUR_GEN += 1
         self.ctx.players.clear()
         start_node = self.ctx.track.starting_node()
         start_angle = self.ctx.track.starting_angle_degree()
@@ -69,9 +71,18 @@ class Game:
             neat_controller = NeatAI(neat_car, genome, neat_net)
             self.ctx.add_player(neat_controller)
 
-        MAX_TICKS = self.ctx.constants.LEARN_TIME_SEC * self.ctx.constants.TARGET_FPS
+        tick = 0
 
-        tick: int = 0
+        time_range = (
+            self.ctx.constants.LEARN_TIME_SEC_MAX
+            - self.ctx.constants.LEARN_TIME_SEC_MIN
+        )
+        time_sec = (
+            CUR_GEN / MAX_GEN * time_range + self.ctx.constants.LEARN_TIME_SEC_MIN
+        )
+
+        max_ticks = int(self.ctx.constants.TARGET_FPS * time_sec)
+
         while not rl.WindowShouldClose():
             self._handle_input()
             self._update(should_remove=False)
@@ -80,12 +91,16 @@ class Game:
                 break
 
             tick += 1
-            if tick >= MAX_TICKS:
+            if tick >= max_ticks:
                 break
 
 
+CUR_GEN: int = 0
+MAX_GEN: int = 2
+
+
 if __name__ == "__main__":
-    game = Game(playable=False, num_ai=0)
+    game = Game()
 
     local_dir = os.path.dirname(__file__)
     neat_config = neat.Config(
@@ -96,4 +111,4 @@ if __name__ == "__main__":
         os.path.join(local_dir, "cfg", "neat-config.txt"),
     )
     population = neat.Population(neat_config)
-    population.run(game.eval_genomes, 50)
+    population.run(game.eval_genomes, MAX_GEN)

@@ -28,8 +28,7 @@ class Collider:
 
             current_color = self._color_at(player._car._pos.x, player._car._pos.y)
             if not Collider.same_color(current_color, track_color):
-                player._car.active = False
-                player.add_score(-1)
+                player.deactivate()
                 continue
 
             self._update_car_rays(ctx, player._car.rays)
@@ -58,14 +57,19 @@ class Collider:
 
     def _update_checkpoint(self, ctx: Context, car: Car) -> None:
         next_idx: int = car.checkpoints_matched
-        next_checkpoint: Vec2 = ctx.track.checkpoint(next_idx)
+        if car.next_checkpoint is None:
+            next: Vec2 = ctx.track.checkpoint(next_idx)
+            car.next_checkpoint = next
+
+        assert car.next_checkpoint
         collision = rl.CheckCollisionCircleRec(
-            (next_checkpoint.x, next_checkpoint.y),
+            (car.next_checkpoint.x, car.next_checkpoint.y),
             ctx.constants.CHECKPOINT_RADIUS,
             car.rect,
         )
         if collision:
             car.checkpoints_matched += 1
+            car.next_checkpoint = ctx.track.checkpoint(next_idx + 1)
 
     @classmethod
     @cache

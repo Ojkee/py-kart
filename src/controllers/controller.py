@@ -23,3 +23,7 @@ class Controller(ABC):
     @abstractmethod
     def add_score(self, value: int) -> None:
         pass
+
+    @abstractmethod
+    def deactivate(self) -> None:
+        self._car.active = False

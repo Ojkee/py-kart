@@ -11,53 +11,6 @@ from src.vec.vec2 import Vec2
 from .constants import SCALE
 
 
-class Wheel:
-    WIDTH: int = 4 * SCALE
-    HEIGHT: int = 8 * SCALE
-
-    def __init__(self, parent: Car, x: float, y: float) -> None:
-        self._parent: Car = parent
-        self._car_relative_pos: Vec2 = Vec2(x, y)
-
-        self._pos: Vec2 = Vec2(0, 0)
-        self._tilt: float = 0.0
-
-    @property
-    def rotation_degree(self) -> float:
-        return self._parent.rotation_degree + self._tilt
-
-    @property
-    def tilt(self) -> float:
-        return self._tilt
-
-    @tilt.setter
-    def tilt(self, value: float) -> None:
-        self._tilt = value
-
-    @property
-    def pos(self) -> Vec2:
-        return self._pos
-
-    def move(self, x: float, y: float) -> None:
-        self._pos = Vec2(x, y)
-
-
-@dataclass
-class WheelInfo:
-    x: int
-    y: int
-    width: int
-    height: int
-    angle: float
-
-
-class WheelPos(Enum):
-    LEFT_FRONT = 1
-    RIGHT_FRONT = 2
-    LEFT_BACK = 3
-    RIGHT_BACK = 4
-
-
 class Car:
     WIDTH: int = 12 * SCALE
     HEIGHT: int = 25 * SCALE
@@ -101,6 +54,7 @@ class Car:
         self.active: bool = True
 
         self.checkpoints_matched: int = 1
+        self._next_checkpoint: Vec2 | None = None
 
         self.update()
 
@@ -155,6 +109,14 @@ class Car:
     @property
     def color(self) -> list[int]:
         return self._color
+
+    @property
+    def next_checkpoint(self) -> Vec2 | None:
+        return self._next_checkpoint
+
+    @next_checkpoint.setter
+    def next_checkpoint(self, value: Vec2) -> None:
+        self._next_checkpoint = value
 
     def accelerate(self, force: float) -> None:
         v = self._velocity + force
@@ -280,3 +242,50 @@ class Car:
         for ray in self._rays:
             ray.angle_deg = ray.angle_deg_relative + self.rotation_degree
             ray.origin = self._pos
+
+
+class Wheel:
+    WIDTH: int = 4 * SCALE
+    HEIGHT: int = 8 * SCALE
+
+    def __init__(self, parent: Car, x: float, y: float) -> None:
+        self._parent: Car = parent
+        self._car_relative_pos: Vec2 = Vec2(x, y)
+
+        self._pos: Vec2 = Vec2(0, 0)
+        self._tilt: float = 0.0
+
+    @property
+    def rotation_degree(self) -> float:
+        return self._parent.rotation_degree + self._tilt
+
+    @property
+    def tilt(self) -> float:
+        return self._tilt
+
+    @tilt.setter
+    def tilt(self, value: float) -> None:
+        self._tilt = value
+
+    @property
+    def pos(self) -> Vec2:
+        return self._pos
+
+    def move(self, x: float, y: float) -> None:
+        self._pos = Vec2(x, y)
+
+
+@dataclass
+class WheelInfo:
+    x: int
+    y: int
+    width: int
+    height: int
+    angle: float
+
+
+class WheelPos(Enum):
+    LEFT_FRONT = 1
+    RIGHT_FRONT = 2
+    LEFT_BACK = 3
+    RIGHT_BACK = 4
