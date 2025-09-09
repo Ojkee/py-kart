@@ -96,7 +96,7 @@ class Game:
 
 
 CUR_GEN: int = 0
-MAX_GEN: int = 2
+MAX_GEN: int = 100
 
 
 if __name__ == "__main__":

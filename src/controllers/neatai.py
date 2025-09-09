@@ -28,8 +28,14 @@ class NeatAI(Controller):
 
     def handle_input(self) -> list[Command]:
         d = self._next_checkpoint_delta()
-        input = tuple(abs(ray) for ray in self._car.rays) + (
-            self._car._velocity,
+        velocity = (
+            self._car._velocity / self._car.MAX_SPEED_FORWARD
+            if self._car._velocity < 0
+            else self._car._velocity / self._car.MAX_SPEED_BACKWARD
+        )
+        # TODO: refacotor, 96 is max ray len
+        input = tuple(abs(ray) / 96 for ray in self._car.rays) + (
+            velocity,
             self._car._steering_angle() / 45,
             d.x / 100,
             d.y / 100,
