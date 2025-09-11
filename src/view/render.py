@@ -25,9 +25,10 @@ class Renderer:
         )
         rl.EndTextureMode()
 
-    def draw(self, ctx: Context) -> None:
+    def begin(self) -> None:
         rl.BeginDrawing()
 
+    def draw(self, ctx: Context) -> None:
         self._draw_track(ctx)
         for car in ctx.cars:
             self._draw_car(car)
@@ -38,7 +39,13 @@ class Renderer:
                 self._draw_next_checkpoint(ctx, car)
 
         rl.DrawFPS(4, 4)
+
+    def end(self) -> None:
         rl.EndDrawing()
+
+    def draw_stats(self, ctx: Context, cur_gen: int, max_gen: int) -> None:
+        stat_str: bytes = f"{cur_gen:4} / {max_gen:4}".encode()
+        rl.DrawText(stat_str, 0, ctx.constants.HEIGHT - 50, 32, rl.WHITE)
 
     def _draw_car(self, car: Car) -> None:
         x, y, w, h = car.rect

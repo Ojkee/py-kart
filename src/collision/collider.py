@@ -64,7 +64,7 @@ class Collider:
         assert car.next_checkpoint
         collision = rl.CheckCollisionCircleRec(
             (car.next_checkpoint.x, car.next_checkpoint.y),
-            ctx.constants.CHECKPOINT_RADIUS,
+            ctx.constants.CHECKPOINT_RADIUS * 1.5,
             car.rect,
         )
         if collision:

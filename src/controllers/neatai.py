@@ -53,27 +53,21 @@ class NeatAI(Controller):
 
     def update_score(self) -> None:
         self.genome.fitness = self._car.checkpoints_matched * 10
+        d = self._next_checkpoint_delta()
+        dist = math.hypot(d.x, d.y) / 100
+        self.genome.fitness -= dist
 
     def add_score(self, value: int) -> None:
         self.genome.fitness += value
 
     def deactivate(self) -> None:
-        d = self._next_checkpoint_delta()
-        dist = math.hypot(d.x, d.y) / 100
-        self.genome.fitness -= dist
         return super().deactivate()
 
     def _next_checkpoint_delta(self) -> Vec2:
-        dx = (
-            self._car.next_checkpoint.x - self._car._pos.x
-            if self._car.next_checkpoint
-            else 0
-        )
-        dy = (
-            self._car.next_checkpoint.y - self._car._pos.y
-            if self._car.next_checkpoint
-            else 0
-        )
+        if not self._car.next_checkpoint:
+            return Vec2(0, 0)
+        dx = self._car.next_checkpoint.x - self._car._pos.x
+        dy = self._car.next_checkpoint.y - self._car._pos.y
         return Vec2(dx, dy)
 
     @staticmethod

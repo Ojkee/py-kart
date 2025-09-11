@@ -40,7 +40,9 @@ class Game:
         while not rl.WindowShouldClose():
             self._handle_input()
             self._update()
+            self.renderer.begin()
             self.renderer.draw(self.ctx)
+            self.renderer.end()
 
     def _handle_input(self) -> None:
         for player in self.ctx.players:
@@ -86,7 +88,10 @@ class Game:
         while not rl.WindowShouldClose():
             self._handle_input()
             self._update(should_remove=False)
+            self.renderer.begin()
             self.renderer.draw(self.ctx)
+            self.renderer.draw_stats(self.ctx, CUR_GEN, MAX_GEN)
+            self.renderer.end()
             if not any(self.ctx.cars):
                 break
 
@@ -96,7 +101,7 @@ class Game:
 
 
 CUR_GEN: int = 0
-MAX_GEN: int = 100
+MAX_GEN: int = 200
 
 
 if __name__ == "__main__":
@@ -112,3 +117,4 @@ if __name__ == "__main__":
     )
     population = neat.Population(neat_config)
     population.run(game.eval_genomes, MAX_GEN)
+    # game.run()

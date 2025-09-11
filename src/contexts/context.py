@@ -7,7 +7,7 @@ from src.vehicle.car import Car
 @dataclass
 class Constants:
     TARGET_FPS: int = 60
-    LEARN_TIME_SEC_MIN: int = 5
+    LEARN_TIME_SEC_MIN: int = 3
     LEARN_TIME_SEC_MAX: int = 15
 
     WINDOW_SCALE: int = 100
